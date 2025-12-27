@@ -3,6 +3,7 @@ import Mainlayout from "../Layouts/Mainlayout";
 import Home from "../Components/pages/Home";
 import AddPrice from "../Components/pages/AddPrice";
 import UpdateSellingRate from "../Components/pages/UpdateSelling";
+import AddCustomer from "../Components/pages/AddCustomer";
 
 const router = createBrowserRouter([
   {
@@ -24,6 +25,10 @@ const router = createBrowserRouter([
       {
         path: "updateSellingRate",
         element: <UpdateSellingRate></UpdateSellingRate>
+      },
+      {
+        path: "addCustomer",
+        element: <AddCustomer></AddCustomer>
       },
     ],
   },

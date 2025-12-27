@@ -1,181 +1,148 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import api from "../../api";
 
-// Demo customers (Bangla names)
-const customers = [
-  { name: "আব্দুল করিম" },
-  { name: "রহিম উদ্দিন" },
-  { name: "মিজানুর রহমান" },
-  { name: "কামরুল হাসান" },
-  { name: "রফিকুল ইসলাম" },
-  { name: "সোহেল রানা" },
-  { name: "ইমরান হোসেন" },
-  { name: "নাঈম উদ্দিন" },
-  { name: "সাব্বির আহমেদ" },
-  { name: "ফারুক হোসেন" },
-];
-
-// Bangla number display (frontend only)
-const toBanglaNumber = (num) => {
-  const bn = ["০","১","২","৩","৪","৫","৬","৭","৮","৯"];
-  return num.toString().split("").map(d => bn[d] ?? d).join("");
-};
-
 const AddPrice = () => {
-  const [rows, setRows] = useState([
-    {
-      customerName: "",
-      proposalBig: "",
-      proposalSmall: "",
-    },
-  ]);
+  const [customers, setCustomers] = useState([]);
+  const [proposalBig, setProposalBig] = useState("");
+  const [proposalSmall, setProposalSmall] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [loadingCustomers, setLoadingCustomers] = useState(false);
 
-  // select customer
-  const handleCustomerChange = (index, value) => {
-    const updated = [...rows];
-    updated[index].customerName = value;
-    setRows(updated);
+  const today = new Date().toISOString().split("T")[0];
+
+  // 🔹 FETCH CUSTOMERS FROM DB
+  const fetchCustomers = async () => {
+    try {
+      setLoadingCustomers(true);
+      const res = await api.get("/customers");
+      setCustomers(res.data || []);
+    } catch (err) {
+      console.error(err);
+      alert("কাস্টমার লোড করা যায়নি");
+    } finally {
+      setLoadingCustomers(false);
+    }
   };
 
-  // input change
-  const handleChange = (index, field, value) => {
-    const updated = [...rows];
-    updated[index][field] = value;
-    setRows(updated);
-  };
+  useEffect(() => {
+    fetchCustomers();
+  }, []);
 
-  // add row
-  const addRow = () => {
-    setRows([
-      ...rows,
-      { customerName: "", proposalBig: "", proposalSmall: "" },
-    ]);
-  };
-
-  // save proposal price (Sorif)
+  // 🔥 SAVE SAME RATE FOR ALL CUSTOMERS
   const handleSave = async () => {
-  try {
-    const filteredRows = rows.filter(r => r.customerName);
-
-    if (filteredRows.length === 0) {
-      alert("কমপক্ষে একজন কাস্টমার নির্বাচন করুন");
+    if (!proposalBig || !proposalSmall) {
+      alert("আজকের বয়লার বড় ও ছোট রেট দিন");
       return;
     }
 
-    const payload = {
-      date: new Date().toISOString().split("T")[0], // YYYY-MM-DD
-      rates: filteredRows.map(row => ({
-        customerName: row.customerName,
-        proposalPrice: {
-          sorifVai: {
-            boilerBig: Number(row.proposalBig),
-            boilerSmall: Number(row.proposalSmall),
+    if (customers.length === 0) {
+      alert("কোনো কাস্টমার পাওয়া যায়নি");
+      return;
+    }
+
+    try {
+      setSaving(true);
+
+      const payload = {
+        date: today,
+        createdAt: new Date(),
+        rates: customers.map((c) => ({
+          customerName: c.name,
+          proposalPrice: {
+            sorifVai: {
+              boilerBig: Number(proposalBig),
+              boilerSmall: Number(proposalSmall),
+            },
           },
-        },
-        actualSellingPrice: {
-          ronyVai: {
-            boilerBig: 0,
-            boilerSmall: 0,
+          actualSellingPrice: {
+            ronyVai: {
+              boilerBig: 0,
+              boilerSmall: 0,
+            },
           },
-        },
-      })),
-      createdAt: new Date(),
-    };
+        })),
+      };
 
-    await api.post("/sellingRate", payload);
+      await api.post("/sellingRate", payload);
 
-    alert("আজকের প্রাইস সফলভাবে সংরক্ষণ হয়েছে ✅");
-  } catch (err) {
-    console.error(err);
-    alert("Failed to save ❌");
-  }
-};
-
+      alert("আজকের রেট সব কাস্টমারের জন্য সংরক্ষণ হয়েছে ✅");
+    } catch (err) {
+      console.error(err);
+      alert("সংরক্ষণ ব্যর্থ হয়েছে ❌");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
-    <div className="max-w-5xl mx-auto mt-6 p-4">
-      <table className="w-full border text-sm">
-        <thead className="bg-purple-100 text-purple-800">
-          <tr>
-            <th className="border px-3 py-2">কাস্টমার নাম</th>
-            <th colSpan="2" className="border px-3 py-2 text-center">
-              প্রস্তাবিত মূল্য (শরীফ)
-            </th>
-          </tr>
-          <tr className="bg-purple-50">
-            <th></th>
-            <th className="border px-3 py-2">বয়লার বড়</th>
-            <th className="border px-3 py-2">বয়লার ছোট</th>
-          </tr>
-        </thead>
+    <div className="max-w-md mx-auto mt-6 p-4 border rounded-lg shadow-sm">
 
-        <tbody>
-          {rows.map((row, index) => (
-            <tr key={index}>
-              <td className="border px-2 py-2">
-                <select
-                  value={row.customerName}
-                  onChange={(e) =>
-                    handleCustomerChange(index, e.target.value)
-                  }
-                  className="w-full border px-2 py-1 rounded"
-                >
-                  <option value="">নির্বাচন করুন</option>
-                  {customers.map((c, i) => (
-                    <option key={i} value={c.name}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
-              </td>
+      {/* TODAY DATE */}
+      <div className="mb-2 text-center">
+        <p className="text-sm text-gray-500">
+          📅 আজকের তারিখ: <span className="font-semibold">{today}</span>
+        </p>
+      </div>
 
-              <td className="border px-2 py-1">
-                <input
-                  type="number"
-                  value={row.proposalBig}
-                  onChange={(e) =>
-                    handleChange(index, "proposalBig", e.target.value)
-                  }
-                  className="w-full border px-2 py-1 text-right"
-                  placeholder="৳"
-                />
-                <small className="text-gray-500">
-                  {row.proposalBig && `৳ ${toBanglaNumber(row.proposalBig)}`}
-                </small>
-              </td>
+      <h2 className="text-lg font-semibold mb-4 text-purple-700 text-center">
+        আজকের প্রস্তাবিত মূল্য (শরীফ ভাই)
+      </h2>
 
-              <td className="border px-2 py-1">
-                <input
-                  type="number"
-                  value={row.proposalSmall}
-                  onChange={(e) =>
-                    handleChange(index, "proposalSmall", e.target.value)
-                  }
-                  className="w-full border px-2 py-1 text-right"
-                  placeholder="৳"
-                />
-                <small className="text-gray-500">
-                  {row.proposalSmall && `৳ ${toBanglaNumber(row.proposalSmall)}`}
-                </small>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      {/* CUSTOMER STATUS */}
+      <div className="mb-4 text-center text-sm">
+        {loadingCustomers && (
+          <span className="text-gray-500">কাস্টমার লোড হচ্ছে...</span>
+        )}
+        {!loadingCustomers && customers.length > 0 && (
+          <span className="text-green-600">
+            মোট কাস্টমার: {customers.length} জন
+          </span>
+        )}
+        {!loadingCustomers && customers.length === 0 && (
+          <span className="text-red-600">
+            কোনো কাস্টমার পাওয়া যায়নি
+          </span>
+        )}
+      </div>
 
-      <div className="flex gap-3 mt-4">
-        <button
-          onClick={addRow}
-          className="bg-purple-600 text-white px-4 py-2 rounded"
-        >
-          + নতুন কাস্টমার
-        </button>
+      {/* RATE INPUTS */}
+      <div className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium mb-1">
+            বয়লার বড়
+          </label>
+          <input
+            type="number"
+            value={proposalBig}
+            onChange={(e) => setProposalBig(e.target.value)}
+            className="w-full border px-3 py-2 rounded"
+            placeholder="৳"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">
+            বয়লার ছোট
+          </label>
+          <input
+            type="number"
+            value={proposalSmall}
+            onChange={(e) => setProposalSmall(e.target.value)}
+            className="w-full border px-3 py-2 rounded"
+            placeholder="৳"
+          />
+        </div>
 
         <button
           onClick={handleSave}
-          className="bg-green-600 text-white px-6 py-2 rounded"
+          disabled={saving || loadingCustomers || customers.length === 0}
+          className={`w-full py-2 rounded text-white ${
+            saving || loadingCustomers || customers.length === 0
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-green-600 hover:bg-green-700"
+          }`}
         >
-          সংরক্ষণ করুন
+          {saving ? "সংরক্ষণ হচ্ছে..." : "আজকের রেট সংরক্ষণ করুন"}
         </button>
       </div>
     </div>
