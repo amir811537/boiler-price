@@ -8,7 +8,11 @@ const AddPrice = () => {
   const [saving, setSaving] = useState(false);
   const [loadingCustomers, setLoadingCustomers] = useState(false);
 
-  const today = new Date().toISOString().split("T")[0];
+  // 🔹 DATE HANDLING
+  const isoDate = new Date().toISOString().split("T")[0]; // 2025-12-28 (DB)
+  const displayDate = new Date()
+    .toLocaleDateString("en-GB")
+    .replace(/\//g, "-"); // 28-12-2025 (UI)
 
   // 🔹 FETCH CUSTOMERS FROM DB
   const fetchCustomers = async () => {
@@ -44,7 +48,7 @@ const AddPrice = () => {
       setSaving(true);
 
       const payload = {
-        date: today,
+        date: isoDate, // ✅ DB friendly date
         createdAt: new Date(),
         rates: customers.map((c) => ({
           customerName: c.name,
@@ -66,6 +70,8 @@ const AddPrice = () => {
       await api.post("/sellingRate", payload);
 
       alert("আজকের রেট সব কাস্টমারের জন্য সংরক্ষণ হয়েছে ✅");
+      setProposalBig("");
+      setProposalSmall("");
     } catch (err) {
       console.error(err);
       alert("সংরক্ষণ ব্যর্থ হয়েছে ❌");
@@ -77,10 +83,11 @@ const AddPrice = () => {
   return (
     <div className="max-w-md mx-auto mt-6 p-4 border rounded-lg shadow-sm">
 
-      {/* TODAY DATE */}
+      {/* 📅 TODAY DATE */}
       <div className="mb-2 text-center">
         <p className="text-sm text-gray-500">
-          📅 আজকের তারিখ: <span className="font-semibold">{today}</span>
+          📅 আজকের তারিখ:{" "}
+          <span className="font-semibold">{displayDate}</span>
         </p>
       </div>
 
@@ -88,7 +95,7 @@ const AddPrice = () => {
         আজকের প্রস্তাবিত মূল্য (শরীফ ভাই)
       </h2>
 
-      {/* CUSTOMER STATUS */}
+      {/* 👥 CUSTOMER STATUS */}
       <div className="mb-4 text-center text-sm">
         {loadingCustomers && (
           <span className="text-gray-500">কাস্টমার লোড হচ্ছে...</span>
@@ -105,7 +112,7 @@ const AddPrice = () => {
         )}
       </div>
 
-      {/* RATE INPUTS */}
+      {/* 💰 RATE INPUTS */}
       <div className="space-y-4">
         <div>
           <label className="block text-sm font-medium mb-1">
