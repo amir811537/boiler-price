@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../../api";
+import MonthlyReport from "./MonthlyReport";
 
 // 🔢 Bangla number converter
 const toBanglaNumber = (num) => {
@@ -16,6 +17,8 @@ const toBanglaNumber = (num) => {
 const getToday = () => new Date().toISOString().split("T")[0];
 
 const Home = () => {
+
+
   const [selectedDate, setSelectedDate] = useState(getToday());
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -184,6 +187,8 @@ const Home = () => {
 
         </table>
       </div>
+<MonthlyReport></MonthlyReport>
+
     </div>
   );
 };

@@ -4,6 +4,8 @@ import Home from "../Components/pages/Home";
 import AddPrice from "../Components/pages/AddPrice";
 import UpdateSellingRate from "../Components/pages/UpdateSelling";
 import AddCustomer from "../Components/pages/AddCustomer";
+import DailyAttendance from "../Components/pages/DailyAttendance";
+import EmployeeManager from "../Components/pages/EmployeeManager";
 
 const router = createBrowserRouter([
   {
@@ -11,12 +13,12 @@ const router = createBrowserRouter([
     element: <Mainlayout />,
     children: [
       {
-        index: true, 
-        element:<Home></Home>
+        index: true,
+        element: <Home></Home>,
       },
       {
-        path: "home", 
-        element: <Home/>,
+        path: "home",
+        element: <Home />,
       },
       {
         path: "addPrice",
@@ -24,11 +26,22 @@ const router = createBrowserRouter([
       },
       {
         path: "updateSellingRate",
-        element: <UpdateSellingRate></UpdateSellingRate>
+        element: <UpdateSellingRate></UpdateSellingRate>,
       },
       {
         path: "addCustomer",
-        element: <AddCustomer></AddCustomer>
+        element: <AddCustomer></AddCustomer>,
+      },
+    
+      {
+        path: "MangeEmployee",
+        element:<EmployeeManager></EmployeeManager>
+      },
+      {
+        path: "dailyAttendance",
+        element: <DailyAttendance></DailyAttendance>
+   
+   
       },
     ],
   },

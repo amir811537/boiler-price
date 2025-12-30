@@ -12,6 +12,8 @@ const Navbar = () => {
     { path: "/addPrice", label: "Add Price" },
     { path: "/updateSellingRate", label: "Selling Rate" },
     { path: "/addCustomer", label: "Add Customer" },
+    { path: "/MangeEmployee", label: "Manage Employee" },
+    { path: "/dailyAttendance", label: "Attendance" },
   ];
   return (
   <>
