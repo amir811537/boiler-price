@@ -71,7 +71,8 @@ const AddCustomer = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-8 p-6 bg-white border rounded-lg shadow-sm">
+   <div className="mx-2">
+     <div className="max-w-md mx-auto mt-8 p-6 bg-white border rounded-lg shadow-sm">
 
       {/* ADD CUSTOMER */}
       <h2 className="text-lg font-semibold text-purple-700 mb-4 text-center">
@@ -146,6 +147,7 @@ const AddCustomer = () => {
         ℹ️ কাস্টমার ডিলিট করলে সংশ্লিষ্ট সব দিনের রেট থেকেও সে বাদ যাবে
       </p>
     </div>
+   </div>
   );
 };
 

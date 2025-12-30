@@ -81,7 +81,8 @@ const AddPrice = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-6 p-4 border rounded-lg shadow-sm">
+    <div className="mx-2">
+      <div className="max-w-md mx-auto mt-6 p-4 border rounded-lg shadow-sm">
 
       {/* 📅 TODAY DATE */}
       <div className="mb-2 text-center">
@@ -152,6 +153,7 @@ const AddPrice = () => {
           {saving ? "সংরক্ষণ হচ্ছে..." : "আজকের রেট সংরক্ষণ করুন"}
         </button>
       </div>
+    </div>
     </div>
   );
 };
